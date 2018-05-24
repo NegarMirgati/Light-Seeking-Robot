@@ -8,8 +8,11 @@
 [Connecting voltage regulator to battery](https://github.com/facebook/react/wiki/Sites-Using-React)
 
 
-# Servo Motor
-![Pinout](https://c2.staticflickr.com/6/5472/31084586086_90cf3e51e9_o.jpg)
+# Pinouts
+![Pinout_Servo](https://c2.staticflickr.com/6/5472/31084586086_90cf3e51e9_o.jpg)  
+  
+  
+![Pinout_MPU6050](http://42bots.com/wp-content/uploads/2014/03/MPU6050-Arduino-Uno-Connections.jpg)
 
 
 # Things to be added to the document!
