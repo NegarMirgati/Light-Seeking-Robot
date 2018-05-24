@@ -1,11 +1,22 @@
-# CPS project Spring 2018
+# Table of Contents
+* [Team Members](.#Team-Members)
+* [Tutorials](.#Tutorials)
+* [Pinouts](.#Pinouts)
+* [Document](.#Things-to-be-added-to-the-document!)
 
-[DC motor control and pwm signal with L298N ](https://www.youtube.com/watch?v=Da4HY7HZ6h0)  
-[Arduino Robot Light Seeker](http://www.instructables.com/id/First-Arduino-Robot-Light-Seeker/)  
-[Arduino Obstacle Avoider Robot](http://mertarduinotutorial.blogspot.com.tr/2016/12/arduino-project-tutorial-01-obstacle.html) 
-[Arduino Servo Motor](http://www.instructables.com/id/Arduino-Servo-Motors/)  
-[Light Seeking Arduino Robot youtube](https://youtu.be/BuWAZL51YSM)  
-[Connecting voltage regulator to battery](https://github.com/facebook/react/wiki/Sites-Using-React)
+
+# Team Members
+* "Negar Mirgati" negar.nbj95@gmail.com
+* "Ali Shahidi" Alishahidi1997@gmail.com
+* "Setare Askari" setareaskari79@gmail.com
+
+# Tutorials
+* [DC motor control and pwm signal with L298N ](https://www.youtube.com/watch?v=Da4HY7HZ6h0)  
+* [Arduino Robot Light Seeker](http://www.instructables.com/id/First-Arduino-Robot-Light-Seeker/)  
+* [Arduino Obstacle Avoider Robot](http://mertarduinotutorial.blogspot.com.tr/2016/12/arduino-project-tutorial-01-obstacle.html) 
+* [Arduino Servo Motor](http://www.instructables.com/id/Arduino-Servo-Motors/)  
+* [Light Seeking Arduino Robot youtube](https://youtu.be/BuWAZL51YSM)  
+* [Connecting voltage regulator to battery](https://github.com/facebook/react/wiki/Sites-Using-React)
 
 
 # Pinouts
