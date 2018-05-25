@@ -1,3 +1,5 @@
+# Smart Vase
+// TODO : write the description of the project
 # Table of Contents
 * [Team Members](#team-members)
 * [Tutorials](#tutorials)
