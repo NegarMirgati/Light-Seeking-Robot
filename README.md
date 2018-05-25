@@ -19,6 +19,7 @@
 * [Arduino Servo Motor](http://www.instructables.com/id/Arduino-Servo-Motors/)  
 * [Light Seeking Arduino Robot youtube](https://youtu.be/BuWAZL51YSM)  
 * [Connecting voltage regulator to battery](https://github.com/facebook/react/wiki/Sites-Using-React)
+* [How to measure angle using Arduino and MPU6050 Gyro and accelarometer sensor](https://www.youtube.com/watch?v=U7lf_E79j7Q)
 
 
 ## Pinouts
