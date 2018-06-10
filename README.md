@@ -26,7 +26,9 @@
 ![Pinout_Servo](https://c2.staticflickr.com/6/5472/31084586086_90cf3e51e9_o.jpg)  
   
   
-![Pinout_MPU6050](http://42bots.com/wp-content/uploads/2014/03/MPU6050-Arduino-Uno-Connections.jpg)
+![Pinout_MPU6050](http://42bots.com/wp-content/uploads/2014/03/MPU6050-Arduino-Uno-Connections.jpg)  
+  
+![Pinout_SR05](https://howtomechatronics.com/wp-content/uploads/2015/07/Ultrasonic-Sensor-Cirucit-Schematics-04.png)
 
 
 ## Things to be added to the document!
