@@ -21,10 +21,14 @@ BH1750 lightMeter;
 int i = 0;
 int flag; // 0 -> front , 1 -> left
 
-// Create a servo object 
-Servo Servo1; 
-// Declare the Servo pin 
-int servoPin = 9; 
+// Create  servo objects
+Servo Servo1;
+Servo Servo2; 
+
+// Declare the Servo pins
+int servoPin1 = 9; 
+int ServoPin2 = 10;
+
 
 
 const int RightMotorIN3 = 5;    // This pin is used to enable or disable the Right motor. Connected to the base of an NPN transistor.
@@ -113,7 +117,8 @@ void setup()   {
   pinMode(BackSensor, OUTPUT);   // gy-back
  
   // We need to attach the servo to the used pin number 
-  Servo1.attach(servoPin);
+  Servo1.attach(servoPin1);
+  Servo2.attach(ServoPin2);
    
   pinMode(FrontSensor, INPUT);      // Defines this pin as an input.  The Arduino will read values from this pin.
   pinMode(BackSensor, INPUT);     // Defines this pin as an input.  The Arduino will read values from this pin.
