@@ -18,7 +18,7 @@
 * [Arduino Obstacle Avoider Robot](http://mertarduinotutorial.blogspot.com.tr/2016/12/arduino-project-tutorial-01-obstacle.html) 
 * [Arduino Servo Motor](http://www.instructables.com/id/Arduino-Servo-Motors/)  
 * [Light Seeking Arduino Robot youtube](https://youtu.be/BuWAZL51YSM)  
-* [Connecting voltage regulator to battery](https://github.com/facebook/react/wiki/Sites-Using-React)
+* [Connecting voltage regulator to battery](https://www.youtube.com/watch?v=Y-q7OxS4jRE)
 * [How to measure angle using Arduino and MPU6050 Gyro and accelarometer sensor](https://www.youtube.com/watch?v=U7lf_E79j7Q)
 
 
