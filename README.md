@@ -28,7 +28,9 @@
   
 ![Pinout_MPU6050](http://42bots.com/wp-content/uploads/2014/03/MPU6050-Arduino-Uno-Connections.jpg)  
   
-![Pinout_SR05](https://howtomechatronics.com/wp-content/uploads/2015/07/Ultrasonic-Sensor-Cirucit-Schematics-04.png)
+![Pinout_SR05](https://howtomechatronics.com/wp-content/uploads/2015/07/Ultrasonic-Sensor-Cirucit-Schematics-04.png)  
+  
+![Pinout_LDR](http://static.cactus.io/img/hookups/arduino/hookup-arduino-to-LDR-sensor.jpg)
 
 
 ## Things to be added to the document!
