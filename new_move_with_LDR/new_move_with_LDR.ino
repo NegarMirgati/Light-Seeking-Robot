@@ -130,7 +130,7 @@ for(int j = 0; j <= 6; j++){
       
        uint16_t luxb = analogRead(BackSensor);
       
-      delay(200); 
+      delay(100); 
        
       uint16_t luxf = analogRead(FrontSensor);
       
@@ -194,7 +194,7 @@ int get_wheels_degree()
   y=y+gy-by;
   z=z+gz-bz;
   
-  cz=map(z, -750000, 750000, -90, 90);
+  cz=map(z, -750000, 750000, -90, 90)*2;
   return cz;
 }
 
@@ -238,28 +238,30 @@ void loop()    {
    
    
    degreeMax = calc_light_max_degree();
-   delay(1000);
-   Serial.println(degreeMax);
-   delay(1000);
-   
+
    if (degreeMax == 0 || degreeMax == 30 || degreeMax == 60  ) 
   {
    
    robot_init_degree = get_wheels_degree();
-   while(  abs(robot_current_degree - robot_init_degree)  < (90 - degreeMax) )
+   Serial.println(robot_init_degree);
+   while(  abs(robot_current_degree - robot_init_degree)  < (100 - degreeMax) )
    {
-  
-   move_right();
+    Serial.print("init : ");
+    Serial.print(robot_init_degree);
+    Serial.println("current : " );
+    Serial.println(robot_current_degree);
+//     robot_current_degree
+   move_left();
    
    robot_current_degree = get_wheels_degree(); 
    
    } 
 
    stop_robot(); 
-   
+//   
     delay(500);
-
-
+//
+//
 if(max_in_front) {
       move_forward();
        Serial.println("degreeMax == 0 || degreeMax == 30 || degreeMax == 60   front")   ; 
@@ -294,30 +296,33 @@ if(max_in_front) {
   else if (degreeMax == 120 ||   degreeMax == 150  || degreeMax == 180 )
   {
    robot_init_degree = get_wheels_degree();
-   while(  abs(robot_current_degree - robot_init_degree)  < ( degreeMax - 90 ) )
-   {
-  
-   move_left();
-  
-   robot_current_degree = get_wheels_degree(); 
+   while(  abs(robot_current_degree - robot_init_degree)  < ( degreeMax - 85 ) )
+    {
+      Serial.print("init : ");
+      Serial.print(robot_init_degree);
+      Serial.println("current : " );
+      Serial.println(robot_current_degree);
+//      robot_current_degree
+      move_right();
    
+      robot_current_degree = get_wheels_degree(); 
    
    } 
-
     stop_robot();
     
     delay(500);
-   if(max_in_front)
-   {
-    Serial.println("degreeMax == 120 ||   degreeMax == 150  || degreeMax == 180   front ");
+  if(max_in_front) {
       move_forward();
-   }
-    else {
-        Serial.println("degreeMax == 120 ||   degreeMax == 150  || degreeMax == 180  back");
-       move_backward();
+       Serial.println("degreeMax == 0 || degreeMax == 30 || degreeMax == 60   front")   ; 
     }
-    delay(1000);
+    else{
+       move_backward();
+       Serial.println("degreeMax == 0 || degreeMax == 30 || degreeMax == 60   back")   ;
+    }
+    delay(2000);
     stop_robot();
-  } 
+   
+  }
 delay ( 2000);
+//move_forward();
 }
