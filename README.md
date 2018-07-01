@@ -30,7 +30,9 @@
   
 ![Pinout_SR05](https://howtomechatronics.com/wp-content/uploads/2015/07/Ultrasonic-Sensor-Cirucit-Schematics-04.png)  
   
-![Pinout_LDR](http://static.cactus.io/img/hookups/arduino/hookup-arduino-to-LDR-sensor.jpg)
+![Pinout_LDR](http://static.cactus.io/img/hookups/arduino/hookup-arduino-to-LDR-sensor.jpg)  
+  
+![Pinout_HC05](https://maker.pro/storage/xGHSPgr/xGHSPgrXjdGGHNqMCWlWXsEj4xZYhZdxlYnJ1ONB.jpeg)
 
 
 ## Things to be added to the document!
