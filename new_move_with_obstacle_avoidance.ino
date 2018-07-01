@@ -1,3 +1,5 @@
+
+
 #include <Wire.h>
 #include <Servo.h> 
 #include "I2Cdev.h"
@@ -18,7 +20,7 @@ int servoPin1 = 9;
 int ServoPin2 = 10;
 
 // Declare Sr04 pins
-int echoPin1 = 15;
+int echoPin1 = 12;
 int trigPin1 = 16;
 
 int echoPin2 = 11;
@@ -65,7 +67,7 @@ float rz=0;
 int robot_init_degree = 0;
 int robot_current_degree = 0;
 
-int  luxes_and_degrees[7][3];
+
 
  void move_right()  {
   
@@ -120,12 +122,14 @@ int  luxes_and_degrees[7][3];
   //  Serial.println("Stop");                                     
  }
 
-int calc_light_max_degree(){
+int calc_light_max_degree(int luxes_and_degrees[14][3]){
    Serial.println(" Calc_degree called");
    Servo1.write(0); 
    Servo2.write(0);
    maxLX = 0 ; 
    degreeMax = 0;
+
+
 
 for(int j = 0; j <= 6; j++){
       
@@ -140,15 +144,14 @@ for(int j = 0; j <= 6; j++){
        
       uint16_t luxf = analogRead(FrontSensor);
       
-      Serial.print("Light F: ");
-      Serial.print(luxf);
-      Serial.println(" lx");
-      Serial.print("Light B: ");
-      Serial.print(luxb);
-      Serial.println(" lx");
-      Serial.println("the other sensor");
-    if(luxb > maxLX) 
-      {
+//      Serial.print("Light F: ");
+//      Serial.print(luxf);
+//      Serial.println(" lx");
+//      Serial.print("Light B: ");
+//      Serial.print(luxb);
+//      Serial.println(" lx");
+//      Serial.println("the other sensor");
+  
         back_distance = 2001 ;
         int  count = 0 ;
         while  ( back_distance > 2000 && count < 11  ) 
@@ -156,90 +159,136 @@ for(int j = 0; j <= 6; j++){
          back_distance  = calc_distance(2);
          count++;
         }
-        if ( back_distance > 60){
+        if ( back_distance > 40){
           Serial.print("distance in backkkkkkkkkkkkkkkk : ");
           Serial.println(back_distance);
-          Serial.print(" Current max in Back :  ");
-          Serial.println(luxb);
+//          Serial.print(" Current max in Back :  ");
+//          Serial.println(luxb);
           //maxLX = luxb;
           //degreeMax = j*30;
           //max_in_front = false;
-          luxes_and_degrees[j][0] = luxb;
-          luxes_and_degrees[j][1] = 2;
-          (luxes_and_degrees[j][2] == 2) ? luxes_and_degrees[j][2] = 2 : luxes_and_degrees[j][2] = 1;
-          Serial.print("maxLX : ");
-          Serial.println(maxLX);
+          luxes_and_degrees[j+7][0] = luxb;
+   
+          if (luxes_and_degrees[j+7][1] == 2) {
+            (luxes_and_degrees[j+7][1] = 2) ; 
+          }
+          else if ( luxes_and_degrees[j+7][1] != 2 )
+          {
+            (luxes_and_degrees[j+7][1] = 1);
+          }
+          luxes_and_degrees[j+7][2] = back_distance;
+//          Serial.print("maxLX : ");
+//          Serial.println(maxLX);
         
         }
-        else if(back_distance <= 60 && back_distance >= 30){
+        else if(back_distance <= 40 && back_distance >= 25){
 
-          luxes_and_degrees[j][0] = luxb;
-          luxes_and_degrees[j][1] = 1;
-          luxes_and_degrees[j][2] = 0;
+          luxes_and_degrees[j+7][0] = luxb;
+ 
+          luxes_and_degrees[j+7][1] = 0;
+          luxes_and_degrees[j+7][2] = back_distance;
 
         }
-        else if(back_distance < 30){
-          if(j-1 >= 0){
-            
-            luxes_and_degrees[j-1][2] = 0;
+        else if(back_distance < 25){
+          if(j+7-1 >= 7){
+            luxes_and_degrees[j+7][1] = 0;
+            luxes_and_degrees[j+7][2] = back_distance;
+            luxes_and_degrees[j+7-1][1] = 0;
           }
-          else if(j+1 <= 6){
-            luxes_and_degrees[j+1][2] = 2;
+       if(j+7+1 <= 13){
+            luxes_and_degrees[j+7][1] = 0;
+            luxes_and_degrees[j+7][2] = back_distance;
+            luxes_and_degrees[j+7+1][1] = 2;
+            Serial.print(" Changing "); Serial.print(j+1+7); Serial.println(" to 2");
           }
         }
    
-      }
-      if(luxf > maxLX) 
-      {
+      
+     
         front_distance = 2001 ;
-        int count = 0;
+        count = 0;
         while  (  front_distance > 2000 && count < 11 ) 
         {
           front_distance  = calc_distance(1);
           count++;
         }
-       if ( front_distance > 60){
+       if ( front_distance > 40 ){
           Serial.print("distance in fronttttttttttt : ");
           Serial.println(front_distance);
-          Serial.print(" Current max in Front :  ");
-          Serial.println(luxf);
+//          Serial.print(" Current max in Front :  ");
+//          Serial.println(luxf);
           //maxLX = luxb;
           //degreeMax = j*30;
           //max_in_front = false;
           luxes_and_degrees[j][0] = luxf;
-          luxes_and_degrees[j][1] = 1;
-          (luxes_and_degrees[j][2] == 2) ? luxes_and_degrees[j][2] = 2 : luxes_and_degrees[j][2] = 1;
+          if (luxes_and_degrees[j][1] == 2) {
+            (luxes_and_degrees[j][1] = 2);
+          }
+          else if (luxes_and_degrees[j][1] != 2) {
+            (luxes_and_degrees[j][1] = 1);
+          }
+           luxes_and_degrees[j][2] = front_distance;
           //Serial.print("maxLX : ");
           //Serial.println(maxLX);
         
         }
-        else if(front_distance <= 60 && front_distance >= 30){
+        else if(front_distance <= 40 && front_distance >= 25){
 
           luxes_and_degrees[j][0] = luxf;
-          luxes_and_degrees[j][1] = 1;
-          luxes_and_degrees[j][2] = 0;
+          luxes_and_degrees[j][1] = 0;
+          luxes_and_degrees[j][2] = front_distance;
+
+
+
 
         }
-        else if(front_distance < 30){
+        else if(front_distance < 25){
+
           if(j-1 >= 0){
-            
-            luxes_and_degrees[j-1][2] = 0;
+            luxes_and_degrees[j][1] = 0;
+            luxes_and_degrees[j-1][1] = 0;
+            luxes_and_degrees[j][2] = front_distance;
           }
-          else if(j+1 <= 6){
-            luxes_and_degrees[j+1][2] = 2;
+        if(j+1 <= 6){
+             luxes_and_degrees[j][1] = 0;
+              luxes_and_degrees[j][2] = front_distance;
+            luxes_and_degrees[j+1][1] = 2;
+            Serial.print(" Changing ");  Serial.print(j+1);  Serial.print("to 2");
           }
         }
    
     
-      }
+      
       delay(1000);
    }
    maxLX = 0;
-   for(int cnt = 0; cnt <= 6; cnt++){
-      if(luxes_and_degrees[cnt][2] == 1 && luxes_and_degrees[cnt][0] > maxLX){
+   for(int cnt = 0; cnt <= 13; cnt++){
+     Serial.print("degreeeeeeeeeeeeeeee " );
+    if ( cnt <= 6 )
+    {
+      Serial.println(cnt*30);
+    }
+    
+     Serial.print("luxes_and_degrees[cnt][0] " );
+     Serial.println(luxes_and_degrees[cnt][0]);
+     Serial.print("luxes_and_degrees[cnt][1] " );
+     Serial.println(luxes_and_degrees[cnt][1]);
+     Serial.print("luxes_and_degrees[cnt][2] " );
+     Serial.println(luxes_and_degrees[cnt][2]);
+      if( (luxes_and_degrees[cnt][1] == 1) && (luxes_and_degrees[cnt][0] > maxLX)){
         maxLX = luxes_and_degrees[cnt][0];
-        degreeMax = cnt * 30;
-        max_in_front = (luxes_and_degrees[cnt][1] == 1) ?  true : false;
+        if ( cnt <= 6 )
+        {
+           degreeMax = cnt * 30;
+           max_in_front = true;
+        }
+        else if ( cnt >= 7 )
+        {
+          degreeMax = (cnt - 7) * 30;
+           max_in_front = false;
+        }
+       
+        //max_in_front = (luxes_and_degrees[cnt][1] == 1) ?  true : false;
       }
    }
    return  degreeMax;
@@ -278,7 +327,10 @@ int get_wheels_degree()
 void setup()   { 
   /* We connected ENA and ENB to VCC*/
   //analogWrite(ENA, 255);   
-  //analogWrite(ENB, 255); 
+  //analogWrite(ENB, 255);
+
+
+
 
   pinMode(LeftMotorIN1, OUTPUT);      // Defines this pin as an output. The Arduino will write values to this pin.
   pinMode(LeftMotorIN2, OUTPUT);      // Defines this pin as an output. The Arduino will write values to this pin.
@@ -294,20 +346,25 @@ void setup()   {
   // We need to attach the servo to the used pin number 
   Servo1.attach(servoPin1);
   Servo2.attach(ServoPin2);
-
-  mpu.initialize();
+  Serial.begin(9600); 
+  Serial.println("ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
+ // mpu.initialize();
+  Serial.println("ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
    
-  Serial.begin(9600);              // Enables a serial connection through the Arduino to either USB or UART (pins 0&1). Note that the baud rate is set to 9600
+             // Enables a serial connection through the Arduino to either USB or UART (pins 0&1). Note that the baud rate is set to 9600
   Serial.println(" \nBeginning Light Seeking Behavior");   // Placed at the very end of void Setup() so that it is runs once, right before the void Loop()
 
-  Serial.println("Initialize MPU");
-
-  Serial.println(mpu.testConnection() ? "Connected" : "Connection failed");
+//  Serial.println("Initialize MPU");
+//
+//  Serial.println(mpu.testConnection() ? "Connected" : "Connection failed");
  
   Wire.begin();
 
  
 }
+
+
+
 
 int calc_distance(int mode)
 {
@@ -341,12 +398,12 @@ int calc_distance(int mode)
 }
 void loop()    {
 
-   init_mpu();
-
+//   init_mpu();
+    int  luxes_and_degrees[14][3];  //0 -> lux , 1 -> validity  , 2 -> distance
    
    
-   degreeMax = calc_light_max_degree();
-
+   degreeMax = calc_light_max_degree(luxes_and_degrees);
+/*
    if (degreeMax == 0 || degreeMax == 30 || degreeMax == 60  ) 
   {
    
@@ -363,7 +420,9 @@ void loop()    {
    
    robot_current_degree = get_wheels_degree(); 
    
-   } 
+   }
+
+
 
    stop_robot(); 
 //   
@@ -431,7 +490,6 @@ if(max_in_front) {
     stop_robot();
    
   }
-delay ( 2000);
-//move_forward();
+delay ( 1000);
+//move_forward();   */
 }
-
