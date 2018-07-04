@@ -8,8 +8,12 @@ void setup()
 {
   Serial.begin(9600);
   Serial.println("Start Bluetooth");
-  BTSerial.begin(9600);  // HC-05 default speed in AT command more
+  BTSerial.begin(9600);
   BTSerial.write("Enter minimum moisture value : ");
+  BTSerial.write("**Enter 1 for low moisture \n");
+  BTSerial.write("**Enter 2 for medium moisture \n");
+  BTSerial.write("**Enter 3 for high moisture \n");
+  
 }
 
 void loop()
