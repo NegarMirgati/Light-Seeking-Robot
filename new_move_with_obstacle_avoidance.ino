@@ -1,27 +1,23 @@
-
-
 #include <Wire.h>
 #include <Servo.h> 
+#include <SoftwareSerial.h>
 #include "I2Cdev.h"
 #include "MPU6050.h"
-
-
 
 // Create  servo objects
 Servo Servo1;
 Servo Servo2; 
 
-
-MPU6050 mpu;
-
-
 // Declare the Servo pins
 int servoPin1 = 9; 
 int ServoPin2 = 10;
 
+//mpu interrupt pin = 2 
+MPU6050 mpu;
+
 // Declare Sr04 pins
 int echoPin1 = 12;
-int trigPin1 = 16;
+int trigPin1 = A2;
 
 int echoPin2 = 11;
 int trigPin2 = 13;
@@ -33,22 +29,20 @@ const int LeftMotorIN1 = 7;     // This pin is used to enable or disable the Lef
 const int LeftMotorIN2 = 6;     // This pin is used to enable or disable the Left motor. Connected to the base of an NPN transistor.
 
 // Declare photoresistor pins
-const int FrontSensor = 14;
+const int FrontSensor = A0;
 const int BackSensor = A3 ;
 
 // Variable definitions
-int degreeMax;
+int degreeMax = -1;
 bool max_in_front;
 int maxLX;
-int SensorDifference;   // This value is used to determine the difference between the Left and Right
 int distance;
 long duration;
-int mode_distance = 0; // 1 front , 2 back
 int front_distance;
 int back_distance;
 
 
-
+// Variable for mpu 
 int16_t ax, ay, az;
 int16_t gx, gy, gz;
 float x=0;
@@ -64,41 +58,49 @@ int cz=0;
 float bz=0;
 float rz=0;
 
+//Variable use for rotation of robot 
 int robot_init_degree = 0;
 int robot_current_degree = 0;
 
+// Water pomp 
+int Pomp = 8 ;
 
+// Moisture sensor
+ int Moisture_ain=A1;
+
+int ad_value;
+uint16_t measureMoistureTime = 0 ; 
+
+// variables for bluetooth and moisture value 
+SoftwareSerial BTSerial(10, 11); // RX | TX
+int min_Moisture;
+char bt_val;
 
  void move_right()  {
-  
-    digitalWrite(LeftMotorIN1, HIGH);                              // This is used to turn Left. Notice the 
-    digitalWrite(LeftMotorIN2, LOW); 
-    
-    digitalWrite(RightMotorIN3, LOW);                                // opposite motor runs to turn Left.
+
+    digitalWrite(RightMotorIN3, LOW);            
     digitalWrite(RightMotorIN4, HIGH); 
-    
-   // Serial.println("Left");                                      // This prints Left when the robot would actually turn Left.
+  
+    digitalWrite(LeftMotorIN1, HIGH);                           
+    digitalWrite(LeftMotorIN2, LOW); 
  }
 
  void move_left()  {
 
-   digitalWrite(RightMotorIN3, HIGH);                              // This is used to turn Left. Notice the 
+   digitalWrite(RightMotorIN3, HIGH);                         
    digitalWrite(RightMotorIN4, LOW);    
-   digitalWrite(LeftMotorIN1, LOW);                                // opposite motor runs to turn Left.
+  
+   digitalWrite(LeftMotorIN1, LOW);                             
    digitalWrite(LeftMotorIN2, HIGH);   
-    
- //   Serial.println("Right");                                      // This prints Left when the robot would actually turn Left.
  }
 
  void move_forward()  {
   
-    digitalWrite(RightMotorIN3, HIGH);                              // This is used to turn Left. Notice the 
+    digitalWrite(RightMotorIN3, HIGH);                         
     digitalWrite(RightMotorIN4, LOW); 
     
-    digitalWrite(LeftMotorIN1, HIGH);                                // opposite motor runs to turn Left.
+    digitalWrite(LeftMotorIN1, HIGH);                            
     digitalWrite(LeftMotorIN2, LOW); 
-    
-   // Serial.println("Forward");                                      // This prints Left when the robot would actually turn Left.
  }
 
  void move_backward()  {
@@ -108,8 +110,7 @@ int robot_current_degree = 0;
 
     digitalWrite(LeftMotorIN1, LOW);                               
     digitalWrite(LeftMotorIN2, HIGH); 
-    
- //   Serial.println("Backward");                                   
+                                      
  }
  void stop_robot()  {
   
@@ -117,58 +118,69 @@ int robot_current_degree = 0;
     digitalWrite(RightMotorIN4, HIGH); 
 
     digitalWrite(LeftMotorIN1, HIGH);                               
-    digitalWrite(LeftMotorIN2, HIGH); 
-    
-  //  Serial.println("Stop");                                     
+    digitalWrite(LeftMotorIN2, HIGH);                                    
  }
+
+ void get_min_moisture_from_user(){
+  while(true){
+     // Keep reading from HC-05 and send to Arduino Serial Monitor
+  if (BTSerial.available()){
+     
+     bt_val = BTSerial.read();
+     Serial.println(bt_val);
+     if(bt_val == '1' || bt_val == '2' || bt_val == '3'){
+     if(bt_val == '1')  
+      min_Moisture = 550;
+     else if(bt_val == '2') 
+      min_Moisture = 600;
+      else
+        min_Moisture = 650;
+         
+      Serial.println(min_Moisture);
+      BTSerial.end();
+      break;
+     }
+     
+     else
+     BTSerial.write("Invalid Arguement, please try again");  
+  }
+
+  // Keep reading from Arduino Serial Monitor and send to HC-05
+  if (Serial.available())
+    BTSerial.write(Serial.read());
+     }
+     return;
+  }
+
 
 int calc_light_max_degree(int luxes_and_degrees[14][3]){
    Serial.println(" Calc_degree called");
    Servo1.write(0); 
    Servo2.write(0);
    maxLX = 0 ; 
-   degreeMax = 0;
+   degreeMax = -1;
 
 
 
 for(int j = 0; j <= 6; j++){
       
       Servo1.write(j*30); 
-      Servo2.write(j*30);    
-      delay(100);
-      
-      
-       uint16_t luxb = analogRead(BackSensor);
-      
-      delay(100); 
+      Servo2.write(j*30);   
        
+      delay(100);
+      uint16_t luxb = analogRead(BackSensor);
+      delay(100); 
       uint16_t luxf = analogRead(FrontSensor);
       
-//      Serial.print("Light F: ");
-//      Serial.print(luxf);
-//      Serial.println(" lx");
-//      Serial.print("Light B: ");
-//      Serial.print(luxb);
-//      Serial.println(" lx");
-//      Serial.println("the other sensor");
-  
-        back_distance = 2001 ;
-        int  count = 0 ;
-        while  ( back_distance > 2000 && count < 11  ) 
-        {
+      back_distance = 2001 ;
+      int  count = 0 ;
+      while  ( back_distance > 2000 && count < 11  ) {
          back_distance  = calc_distance(2);
          count++;
-        }
-        if ( back_distance > 40){
-          Serial.print("distance in backkkkkkkkkkkkkkkk : ");
-          Serial.println(back_distance);
-//          Serial.print(" Current max in Back :  ");
-//          Serial.println(luxb);
-          //maxLX = luxb;
-          //degreeMax = j*30;
-          //max_in_front = false;
+      }
+      
+        if ( back_distance > 60){
           luxes_and_degrees[j+7][0] = luxb;
-   
           if (luxes_and_degrees[j+7][1] == 2) {
             (luxes_and_degrees[j+7][1] = 2) ; 
           }
@@ -177,34 +189,26 @@ for(int j = 0; j <= 6; j++){
             (luxes_and_degrees[j+7][1] = 1);
           }
           luxes_and_degrees[j+7][2] = back_distance;
-//          Serial.print("maxLX : ");
-//          Serial.println(maxLX);
-        
         }
-        else if(back_distance <= 40 && back_distance >= 25){
-
+        
+        else if(back_distance <= 60 && back_distance >=30){
           luxes_and_degrees[j+7][0] = luxb;
- 
           luxes_and_degrees[j+7][1] = 0;
           luxes_and_degrees[j+7][2] = back_distance;
-
         }
-        else if(back_distance < 25){
+        
+        else if(back_distance < 30){
           if(j+7-1 >= 7){
             luxes_and_degrees[j+7][1] = 0;
-            luxes_and_degrees[j+7][2] = back_distance;
             luxes_and_degrees[j+7-1][1] = 0;
+            luxes_and_degrees[j+7][2] = back_distance;
           }
        if(j+7+1 <= 13){
             luxes_and_degrees[j+7][1] = 0;
             luxes_and_degrees[j+7][2] = back_distance;
             luxes_and_degrees[j+7+1][1] = 2;
-            Serial.print(" Changing "); Serial.print(j+1+7); Serial.println(" to 2");
           }
         }
-   
-      
-     
         front_distance = 2001 ;
         count = 0;
         while  (  front_distance > 2000 && count < 11 ) 
@@ -212,14 +216,7 @@ for(int j = 0; j <= 6; j++){
           front_distance  = calc_distance(1);
           count++;
         }
-       if ( front_distance > 40 ){
-          Serial.print("distance in fronttttttttttt : ");
-          Serial.println(front_distance);
-//          Serial.print(" Current max in Front :  ");
-//          Serial.println(luxf);
-          //maxLX = luxb;
-          //degreeMax = j*30;
-          //max_in_front = false;
+       if ( front_distance > 60 ){
           luxes_and_degrees[j][0] = luxf;
           if (luxes_and_degrees[j][1] == 2) {
             (luxes_and_degrees[j][1] = 2);
@@ -228,22 +225,13 @@ for(int j = 0; j <= 6; j++){
             (luxes_and_degrees[j][1] = 1);
           }
            luxes_and_degrees[j][2] = front_distance;
-          //Serial.print("maxLX : ");
-          //Serial.println(maxLX);
-        
         }
-        else if(front_distance <= 40 && front_distance >= 25){
-
+        else if(front_distance <= 60 && front_distance >= 25){
           luxes_and_degrees[j][0] = luxf;
           luxes_and_degrees[j][1] = 0;
           luxes_and_degrees[j][2] = front_distance;
-
-
-
-
         }
         else if(front_distance < 25){
-
           if(j-1 >= 0){
             luxes_and_degrees[j][1] = 0;
             luxes_and_degrees[j-1][1] = 0;
@@ -255,15 +243,11 @@ for(int j = 0; j <= 6; j++){
             luxes_and_degrees[j+1][1] = 2;
             Serial.print(" Changing ");  Serial.print(j+1);  Serial.print("to 2");
           }
-        }
-   
-    
-      
+        } 
       delay(1000);
    }
    maxLX = 0;
    for(int cnt = 0; cnt <= 13; cnt++){
-     Serial.print("degreeeeeeeeeeeeeeee " );
     if ( cnt <= 6 )
     {
       Serial.println(cnt*30);
@@ -277,22 +261,20 @@ for(int j = 0; j <= 6; j++){
      Serial.println(luxes_and_degrees[cnt][2]);
       if( (luxes_and_degrees[cnt][1] == 1) && (luxes_and_degrees[cnt][0] > maxLX)){
         maxLX = luxes_and_degrees[cnt][0];
-        if ( cnt <= 6 )
-        {
+        if ( cnt <= 6 ){
            degreeMax = cnt * 30;
            max_in_front = true;
         }
-        else if ( cnt >= 7 )
-        {
+        else if ( cnt >= 7 ){
           degreeMax = (cnt - 7) * 30;
            max_in_front = false;
         }
-       
-        //max_in_front = (luxes_and_degrees[cnt][1] == 1) ?  true : false;
       }
    }
    return  degreeMax;
  }
+
+
 
 
 void init_mpu()
@@ -323,47 +305,6 @@ int get_wheels_degree()
   cz=map(z, -750000, 750000, -90, 90)*2;
   return cz;
 }
-
-void setup()   { 
-  /* We connected ENA and ENB to VCC*/
-  //analogWrite(ENA, 255);   
-  //analogWrite(ENB, 255);
-
-
-
-
-  pinMode(LeftMotorIN1, OUTPUT);      // Defines this pin as an output. The Arduino will write values to this pin.
-  pinMode(LeftMotorIN2, OUTPUT);      // Defines this pin as an output. The Arduino will write values to this pin.
-  pinMode(RightMotorIN3, OUTPUT);     // Defines this pin as an output. The Arduino will write values to this pin.
-  pinMode(RightMotorIN4, OUTPUT);     // Defines this pin as an output. The Arduino will write values to this pin.
-
-  // SR05 setup
-  pinMode(trigPin1, OUTPUT); // Sets the trigPin as an Output
-  pinMode(echoPin1, INPUT); // Sets the echoPin as an Input
-  pinMode(trigPin2, OUTPUT); // Sets the trigPin as an Output
-  pinMode(echoPin2, INPUT); // Sets the echoPin as an Input
- 
-  // We need to attach the servo to the used pin number 
-  Servo1.attach(servoPin1);
-  Servo2.attach(ServoPin2);
-  Serial.begin(9600); 
-  Serial.println("ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
- // mpu.initialize();
-  Serial.println("ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
-   
-             // Enables a serial connection through the Arduino to either USB or UART (pins 0&1). Note that the baud rate is set to 9600
-  Serial.println(" \nBeginning Light Seeking Behavior");   // Placed at the very end of void Setup() so that it is runs once, right before the void Loop()
-
-//  Serial.println("Initialize MPU");
-//
-//  Serial.println(mpu.testConnection() ? "Connected" : "Connection failed");
- 
-  Wire.begin();
-
- 
-}
-
-
 
 
 int calc_distance(int mode)
@@ -396,39 +337,92 @@ int calc_distance(int mode)
   Serial.println(distance);
   return distance;
 }
-void loop()    {
 
-//   init_mpu();
-    int  luxes_and_degrees[14][3];  //0 -> lux , 1 -> validity  , 2 -> distance
+
+
+void setup()   { 
+  
+  pinMode(Moisture_ain,INPUT);
+  pinMode(Pomp,OUTPUT);
+
+
+  pinMode(LeftMotorIN1, OUTPUT);      // Defines this pin as an output. The Arduino will write values to this pin.
+  pinMode(LeftMotorIN2, OUTPUT);      // Defines this pin as an output. The Arduino will write values to this pin.
+  pinMode(RightMotorIN3, OUTPUT);     // Defines this pin as an output. The Arduino will write values to this pin.
+  pinMode(RightMotorIN4, OUTPUT);     // Defines this pin as an output. The Arduino will write values to this pin.
+
+  // SR05 setup
+  pinMode(trigPin1, OUTPUT); // Sets the trigPin as an Output
+  pinMode(echoPin1, INPUT); // Sets the echoPin as an Input
+  pinMode(trigPin2, OUTPUT); // Sets the trigPin as an Output
+  pinMode(echoPin2, INPUT); // Sets the echoPin as an Input
+ 
+  // We need to attach the servo to the used pin number 
+  Servo1.attach(servoPin1);
+  Servo2.attach(ServoPin2);
+  
+  Serial.begin(9600); 
+  
+  Serial.println("Start Bluetooth");
+  BTSerial.begin(9600);
+  BTSerial.write("Enter minimum moisture value : ");
+  BTSerial.write("**Enter 1 for low moisture \n");
+  BTSerial.write("**Enter 2 for medium moisture \n");
+  BTSerial.write("**Enter 3 for high moisture \n");
+  Serial.println("Initialize MPU");
+
+  get_min_moisture_from_user();
+  Serial.println("value successfully received");
+  Serial.println(min_Moisture);
+  
+  mpu.initialize();
+  Serial.println(mpu.testConnection() ? "Connected" : "Connection failed"); 
+ 
+  Serial.println(" \nBeginning Light Seeking Behavior");   // Placed at the very end of void Setup() so that it is runs once, right before the void Loop()
+  
+  Wire.begin();
+}
+
+
+void loop()    {
+    int  luxes_and_degrees[14][3]; 
+    init_mpu();
    
-   
+   if(measureMoistureTime % 150 == 0 ) {
+        ad_value=analogRead(Moisture_ain);
+        Serial.print(ad_value);
+        Serial.print (" moisture sensor value received" );
+      if(ad_value < min_Moisture){
+        digitalWrite(Pomp,HIGH);
+        Serial.println("Thirsty");
+        while(ad_value < min_Moisture){
+           ad_value=analogRead(Moisture_ain);
+           delay(100);
+        }
+        digitalWrite(Pomp,LOW);
+      }
+  delay(100);
+  }
+
+
+  
    degreeMax = calc_light_max_degree(luxes_and_degrees);
-/*
-   if (degreeMax == 0 || degreeMax == 30 || degreeMax == 60  ) 
-  {
    
+   if (degreeMax == 0 || degreeMax == 30 || degreeMax == 60  ) {
    robot_init_degree = get_wheels_degree();
    Serial.println(robot_init_degree);
-   while(  abs(robot_current_degree - robot_init_degree)  < (100 - degreeMax) )
-   {
+   while(  abs(robot_current_degree - robot_init_degree)  < (100 - degreeMax) ){
     Serial.print("init : ");
     Serial.print(robot_init_degree);
     Serial.println("current : " );
     Serial.println(robot_current_degree);
-//     robot_current_degree
-   move_left();
-   
-   robot_current_degree = get_wheels_degree(); 
-   
+    move_left();
+    robot_current_degree = get_wheels_degree(); 
    }
 
-
-
    stop_robot(); 
-//   
-    delay(500);
-//
-//
+   delay(500);
+
 if(max_in_front) {
       move_forward();
        Serial.println("degreeMax == 0 || degreeMax == 30 || degreeMax == 60   front")   ; 
@@ -439,19 +433,15 @@ if(max_in_front) {
     }
     delay(2000);
     stop_robot();
-   
   }
-  else if (degreeMax == 90  ) 
-  {
-    if(max_in_front)
-    {
+  else if (degreeMax == 90  ) {
+    if(max_in_front){
       Serial.println("degreeMax 90   front")   ;
       move_forward();
       delay(2000);
       stop_robot();
     }
-    else
-    {
+    else{
       Serial.println("degreeMax 90   back")  ; 
       move_backward();
       delay(2000);
@@ -460,23 +450,18 @@ if(max_in_front) {
   }
     
   
-  else if (degreeMax == 120 ||   degreeMax == 150  || degreeMax == 180 )
-  {
+  else if (degreeMax == 120 ||   degreeMax == 150  || degreeMax == 180 ){
    robot_init_degree = get_wheels_degree();
-   while(  abs(robot_current_degree - robot_init_degree)  < ( degreeMax - 85 ) )
-    {
+   while(  abs(robot_current_degree - robot_init_degree)  < ( degreeMax - 85 ) ){
       Serial.print("init : ");
       Serial.print(robot_init_degree);
       Serial.println("current : " );
       Serial.println(robot_current_degree);
-//      robot_current_degree
-      move_right();
-   
+      move_right(); 
       robot_current_degree = get_wheels_degree(); 
-   
    } 
     stop_robot();
-    
+        
     delay(500);
   if(max_in_front) {
       move_forward();
@@ -488,8 +473,7 @@ if(max_in_front) {
     }
     delay(2000);
     stop_robot();
-   
   }
 delay ( 1000);
-//move_forward();   */
+measureMoistureTime++;
 }
