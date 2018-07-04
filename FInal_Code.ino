@@ -392,10 +392,10 @@ void loop()    {
         ad_value=analogRead(Moisture_ain);
         Serial.print(ad_value);
         Serial.print ("          sldkjflksjlkfjkljsfkljslfjsljflksjfl " );
-      if(ad_value < 750){
+      if(ad_value < min_Moisture){
         digitalWrite(Pomp,HIGH);
         Serial.println("Thirsty");
-        while(ad_value < 800){
+        while(ad_value < min_Moisture){
            ad_value=analogRead(Moisture_ain);
            delay(100);
         }
